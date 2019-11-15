@@ -1,0 +1,224 @@
+#include <stdio.h>
+#include <stdlib.h>
+#define MAX 5
+
+
+struct Element;
+typedef struct Element* element;
+
+typedef struct Element
+{
+	int value;
+
+	element next;
+
+};
+
+
+
+typedef struct Stack
+{
+	int capacity;
+	int top;
+
+	element next;
+
+
+
+};
+
+typedef struct Stack* stack;
+
+stack CreateStack();
+element CreateElement(int);
+element FindLast(stack);
+
+int AddToStack(element,stack);
+
+
+element Push(int,stack);
+
+int DeleteLastElement(stack);
+element Pop(stack);
+
+
+void PrintStack(stack);
+
+///////////////////////////////////
+
+
+int main()
+{
+	stack s =  CreateStack();
+	Push(2,s);
+	Push(3,s);
+	Push(6,s);
+	Pop(s);
+
+	PrintStack(s);
+	
+}
+
+
+
+/////////////////////////////////////
+
+stack CreateStack()
+{
+	int i;
+	stack s = (stack) malloc (sizeof(struct Stack));
+	element pointer;	
+	if(s!=NULL)
+	{
+
+		s->capacity = MAX;
+		s->next = NULL;
+		s->top = 0;
+	}
+
+	
+
+	return s;
+}
+
+element CreateElement(int val)
+{
+	element e = (element) malloc(sizeof(struct Element));
+	if(e!=NULL)
+	{	
+		e->value = val;
+		e->next = NULL;
+	}
+
+	return e;
+}
+
+element FindLast(stack s)
+{
+	element last = s->next;
+	if(last == NULL)
+	{
+		printf("Stack is empty");
+		return NULL;
+	}
+	else
+	{
+		while(last->next != NULL)
+			last = last->next;
+	
+			return last;
+	}
+
+
+}
+int AddToStack(element e, stack s)
+{
+	element last;
+
+	if(e!=NULL && s!=NULL && s->top < s->capacity)
+		last = FindLast(s);
+	else
+	{
+		printf("Something is missing in function AddToStack");
+		return -1;
+	}
+
+	last->next = e;
+	e->next = NULL;
+
+	return 0;
+
+
+
+}
+
+element Push(int val,stack s)
+{
+	element e;
+	if(s->top < s->capacity)
+	{
+		e = CreateElement(val);
+		AddToStack(e,s);
+		s->top++;
+	}
+	else
+	{
+		printf("Stack is full");
+		return NULL;
+	}
+
+}
+
+int DeleteLastElement(stack s)
+{
+	element last;
+	element prev; // Before last
+	if(s!=NULL)
+	{
+
+		if(s->top == 0)
+		{
+			printf("Stack is empty");
+			return 1;
+		}
+		else
+		{
+			last = FindLast(s);
+			free(last);
+			prev = FindLast(s);
+			prev->next = NULL;
+
+			return 0;
+
+		}
+	}
+	else
+	{
+		printf("There is no stack s");
+		return -1;
+	}
+}
+element Pop(stack s)
+{
+	if(s->top == 0)
+	{
+		printf("Stack is empty");
+		return NULL;
+
+	}
+	else
+	{
+		DeleteLastElement(s);
+		s->top--;
+
+
+	}
+
+
+}
+
+void PrintStack(stack s)
+{
+element e;
+
+if( s!=NULL)
+{
+	if(s->top == 0)
+	{
+		printf("Stack is empty");
+
+	}
+	else
+	{
+		e= s->next;
+	
+		while(e!=NULL)
+			printf("%d \n", e->value );
+			
+	}
+
+}
+else
+	printf("Stack doesn't exist!");
+
+}
