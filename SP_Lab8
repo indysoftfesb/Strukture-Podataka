@@ -1,0 +1,325 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#define MAX 32
+
+struct Dir;
+typedef struct Dir Directory;
+typedef struct Dir* directory;
+
+
+struct Dir
+{
+	char name[MAX];
+
+	directory child;
+	directory next;
+	directory next_s;
+
+};
+
+struct Stack;
+typedef struct Stack* stack;
+
+struct Stack
+{
+	int top;
+	int capacity;
+
+	directory next_s;
+};
+
+directory CreateDirectory(char*);
+stack CreateStack();
+
+directory Push(directory, stack);
+void PrintStack(stack);
+directory FindLastOnStack(stack, directory);
+
+
+directory MakeDirectory(directory, directory);
+directory ChooseDirectory(char*, directory, stack);
+
+
+directory MakeDirectory(directory, directory);
+directory ChooseDirectory(char*, directory, stack);
+
+void Pop(stack);
+void PrintDir(directory);
+/////////////////////////////////////
+int main()
+{
+	Directory root;
+	strcpy(root.name, "C");
+	root.child = NULL;
+	root.next = NULL;
+	root.next_s = NULL;
+	stack s = CreateStack();
+
+	directory temp = NULL;
+
+
+	char input_command[MAX] = " ";
+	char input_dirName[MAX] = " ";
+
+	/////////////////////////////////////////////
+
+
+	while (1)
+	{
+		printf("%s:", root.name);
+		PrintStack(s);
+		scanf("%s %s", input_command, input_dirName);
+		//////////////////////////////////////////////////////////////////////////////
+
+		if (strcmp(input_command, "exit") == 0)
+			if (strcmp(input_dirName, "y") == 0)
+				break;
+
+		if (strcmp(input_command, "mk") == 0)
+		{
+			MakeDirectory(CreateDirectory(input_dirName), FindLastOnStack(s, &root));
+			PrintDir(FindLastOnStack(s, &root));
+			printf("\n");
+		}
+
+		if (strcmp(input_command, "cd") == 0)
+		{
+			if (strcmp(input_dirName, "back") == 0)
+			{
+				Pop(s);
+			}
+			else
+				ChooseDirectory(input_dirName, FindLastOnStack(s, &root), s);
+		}
+
+
+
+
+	}
+
+
+
+}
+
+
+
+
+
+
+directory CreateDirectory(char* dirName)
+{
+	directory d = (directory)malloc(sizeof(Directory));
+	if (d != NULL)
+	{
+		strcpy(d->name, dirName);
+
+		d->child = NULL;
+		d->next = NULL;
+		d->next_s = NULL;
+
+		return d;
+
+	}
+	else
+	{
+		printf("Directory allocation failed. \n");
+		return NULL;
+	}
+}
+
+stack CreateStack()
+{
+	stack s = (stack)malloc(sizeof(struct Stack));
+	if (s != NULL)
+	{
+		s->capacity = MAX;
+		s->top = 0;
+		s->next_s = NULL;
+
+		return s;
+	}
+	else
+	{
+		printf("Stack allocation failed");
+		return NULL;
+	}
+}
+
+directory Push(directory d, stack s)
+{
+	directory temp = s->next_s;
+	if (s->top < s->capacity)
+	{
+		if (temp == NULL)
+		{
+			s->next_s = d;
+			d->next_s = NULL;
+			s->top++;
+		}
+		else
+		{
+			while (temp->next_s != NULL)
+				temp = temp->next_s;
+
+			temp->next_s = d;
+			d->next_s = NULL;
+			s->top++;
+
+		}
+
+
+
+		return d;
+
+	}
+	else
+	{
+		printf("Stack is full. \n");
+		return NULL;
+	}
+
+
+
+}
+
+
+void PrintStack(stack s)
+{
+	directory temp = s->next_s;
+	if (temp != NULL)
+		while (temp != NULL)
+		{
+			printf("%s/", temp->name);
+			temp = temp->next_s;
+		}
+}
+
+directory FindLastOnStack(stack s, directory root)
+{
+	directory temp = s->next_s;
+
+	if (temp != NULL)
+	{
+		while (temp->next_s != NULL)
+			temp = temp->next_s;
+
+		return temp;
+	}
+	else
+		return root;
+}
+
+directory MakeDirectory(directory d, directory root)
+{
+	directory temp = root->child;
+
+	if (root != NULL)
+	{
+		if (temp == NULL)
+		{
+			root->child = d;
+			d->next = NULL;
+			d->next_s = NULL;
+
+			return d;
+		}
+		else
+		{
+			while (temp->next != NULL)
+				temp = temp->next;
+
+			temp->next = d;
+			d->next = NULL;
+			d->next_s = NULL;
+
+			return d;
+		}
+	}
+	else
+	{
+		printf("Root directory not found in MK \n");
+		return NULL;
+	}
+}
+
+
+directory ChooseDirectory(char* dirName, directory root, stack s)
+{
+	directory temp = root->child;
+
+	if (temp == NULL)
+	{
+		printf("Empty directory! \n");
+		return NULL;
+	}
+	else
+	{
+		while (strcmp(temp->name, dirName) != 0)
+		{
+
+			temp = temp->next;
+			if (temp == NULL)
+			{
+				printf("No directory under name %s found in directory %s ! \n", dirName, root->name);
+				return NULL;
+			}
+		}
+
+		Push(temp, s);
+		return temp;
+	}
+}
+
+
+void Pop(stack s)
+{
+	directory temp = s->next_s;
+
+	if (temp == NULL)
+	{
+		printf("Empty stack! \n");
+
+	}
+	else
+	{
+		if (temp->next_s == NULL)
+		{
+			s->next_s = NULL;
+
+			s->top--;
+
+		}
+		else
+		{
+			while (temp->next_s->next_s != NULL)
+				temp = temp->next_s;
+
+
+			temp->next_s = NULL;
+
+			s->top--;
+
+		}
+
+
+
+	}
+}
+
+void PrintDir(directory d)
+{
+	directory temp = d->child;
+
+	if (temp == NULL)
+		printf("Empty directory! \n");
+	else
+	{
+		printf("%s \n", d->name);
+		while (temp != NULL)
+		{
+			printf("\t %s \n", temp->name);
+			temp = temp->next;
+		}
+	}
+}
